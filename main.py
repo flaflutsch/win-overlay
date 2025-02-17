@@ -15,7 +15,7 @@ class OverlayWindow(QMainWindow):
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         
         # Set the mobile phone ratio (e.g., 9:16)
-        self.setFixedSize(400, 640)
+        self.setFixedSize(400, 500)
         
         # Position the window in the lower right corner above the taskbar
         screen_geometry = QApplication.primaryScreen().availableGeometry()
