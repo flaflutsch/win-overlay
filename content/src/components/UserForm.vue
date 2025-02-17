@@ -1,14 +1,21 @@
 <template>
   <div class="user-form">
-    <div class="user-info">
+    <div class="header">
+      <h1 class="brand">Yodiko</h1>
       <img :src="userIcon" alt="User Icon" class="user-icon" />
+    </div>
+    <div class="user-info">
       <div class="user-details">
         <h2>{{ userName }}</h2>
         <p>{{ userRole }}</p>
       </div>
     </div>
+    <p class="greeting">Hello {{ userName }}, seems like you are looking for some data in the projects folder. How can I help you?</p>
     <textarea v-model="message" placeholder="Your message here..." rows="4"></textarea>
-    <button @click="submitMessage">Absenden</button>
+    <div class="buttons">
+      <button @click="submitMessage">Send</button>
+      <button @click="closeWindow">Close</button>
+    </div>
   </div>
 </template>
 
@@ -21,18 +28,36 @@ export default {
       userIcon: userIcon, // Use the imported image
       userName: 'John Doe', // Replace with the actual user name
       userRole: 'Verwaltung',
-      message: ''
+      message: '',
+      typewriterText: 'I need to perform a task to...please help.', // Text to be typed out
+      typewriterIndex: 0 // Current index of the text being typed
     };
   },
+  mounted() {
+    this.typeWriter();
+  },
   methods: {
+    typeWriter() {
+      if (this.typewriterIndex < this.typewriterText.length) {
+        this.message += this.typewriterText.charAt(this.typewriterIndex);
+        this.typewriterIndex++;
+        setTimeout(this.typeWriter, 100); // Adjust the speed of typing here
+      }
+    },
     submitMessage() {
-      alert(`Message submitted: ${this.message}`);
-      this.message = ''; // Clear the input after submission
+      // this.message = ''; // Clear the input after submission
       if (window.pyqt) {
         window.pyqt.close_window(); // Call the close_window signal
       }
+    },
+    closeWindow() {
+      console.log("Close button clicked"); // Debug statement
+      if (window.pyqt) {
+        console.log("Emitting terminate_app signal"); // Debug statement
+        window.pyqt.terminate_app(); // Call the terminate_app signal
+      }
     }
-  }
+  },
 };
 </script>
 
@@ -56,6 +81,18 @@ html, body {
   padding: 10px; /* Adding padding to the form */
 }
 
+.header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.brand {
+  font-weight: bold;
+}
+
 .user-info {
   display: flex;
   justify-content: space-between;
@@ -76,6 +113,11 @@ html, body {
   margin-left: auto;
 }
 
+.greeting {
+  margin-bottom: 10px;
+  text-align: left;
+}
+
 textarea {
   width: 100%; /* Set the width to 100% */
   max-width: 600px; /* Set a max-width to ensure it doesn't get too wide */
@@ -85,6 +127,11 @@ textarea {
   border-radius: 4px;
   resize: none;
   box-sizing: border-box; /* Ensuring the padding and border are included in the element's dimensions */
+}
+
+.buttons {
+  display: flex;
+  width: 100%;
 }
 
 button {
@@ -99,5 +146,9 @@ button {
 
 button:hover {
   background-color: #0056b3;
+}
+
+button:last-child {
+  margin-left: auto; /* Move the last button (Close) to the right */
 }
 </style>

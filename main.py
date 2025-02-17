@@ -7,6 +7,7 @@ from PyQt5.QtWebChannel import QWebChannel
 
 class Communicator(QObject):
     close_window = pyqtSignal()
+    terminate_app = pyqtSignal()
 
 class OverlayWindow(QMainWindow):
     def __init__(self):
@@ -26,6 +27,16 @@ class OverlayWindow(QMainWindow):
         self.browser = QWebEngineView(self)
         self.browser.loadFinished.connect(self.adjustSizeToContent)
 
+        # Create a communicator object
+        self.communicator = Communicator()
+        self.communicator.close_window.connect(self.close)  # Connect the signal to the close method
+        self.communicator.terminate_app.connect(self.terminate)  # Connect the signal to the terminate method
+
+        # Set up the web channel
+        channel = QWebChannel(self.browser.page())
+        channel.registerObject("pyqt", self.communicator)  # Register the communicator object
+        self.browser.page().setWebChannel(channel)  # Set the web channel for the page
+
         # Load the local HTML file
         current_dir = os.path.dirname(os.path.abspath(__file__))  # Get the directory of the current script
         html_file_path = os.path.join(current_dir, "index.html")  # Path to the HTML file
@@ -33,21 +44,18 @@ class OverlayWindow(QMainWindow):
         self.browser.setUrl(QUrl("http://localhost:8080"))  # Use QUrl here
         self.setCentralWidget(self.browser)
 
-        # Create a communicator object
-        self.communicator = Communicator()
-        self.communicator.close_window.connect(self.close)  # Connect the signal to the close method
-
-        # Set up the web channel
-        channel = QWebChannel(self.browser.page())
-        channel.registerObject("pyqt", self.communicator)  # Register the communicator object
-        self.browser.page().setWebChannel(channel)  # Set the web channel for the page
-
         # Show the window
         self.show()
 
     @pyqtSlot()
     def close(self):
+        print("Close signal received")  # Debug statement
         super().close()  # Close the window
+
+    @pyqtSlot()
+    def terminate(self):
+        print("Terminate signal received")  # Debug statement
+        QApplication.quit()  # Terminate the application
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
